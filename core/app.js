@@ -5,18 +5,42 @@ require('dotenv').config();
 
 const app = express();
 
+// Cors middleware
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
 
-// Middlewares
-app.use(cors());
+// Middleware to parse JSON requests
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Import routers
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const chefRoutes = require('./routes/chefRoutes'); 
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/chefs', chefRoutes);
 
 // Ping endpoint
 app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
 });
 
+// Middleware to serve static files (if needed)
+app.use(express.static('public'));
 
-// Conecction to MongoDB
+// Middleware to handle errors
+const errorHandler = require('./middlewares/errorHandler');
+const notFound = require('./middlewares/notFound');
+
+app.use(errorHandler);
+app.use(notFound);
+
+// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
