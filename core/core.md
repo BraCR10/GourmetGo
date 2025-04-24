@@ -1,7 +1,9 @@
 ## Rutas de la API
+
 ### Rutas de Autenticación
 - `POST   /api/auth/register`         // Registro de usuario
-- `POST   /api/auth/login`            // Inicio de sesión
+- `POST   /api/auth/register-chef`    // Registro de chef o restaurante
+- `POST   /api/auth/login`            // Inicio de sesión (usuarios y chefs)
 - `POST   /api/auth/logout`           // Cierre de sesión
 - `POST   /api/auth/refresh`          // Refrescar token
 
@@ -46,13 +48,23 @@
 ### Rutas de Utilidades
 - `GET    /api/experiences/:id/qrcode` // Obtener QR para reserva/entrada
 
+---
 
+## Validaciones y Middlewares
+
+- Las rutas `/api/auth/register` y `/api/auth/register-chef` usan middlewares de validación (`validateUser`, `validateChef`) para asegurar que los datos cumplen con los requisitos del proyecto.
+- Las validaciones incluyen: formato de correo, teléfono (8 dígitos), identificación (9 dígitos para usuarios), contraseña (mínimo 6 letras, 4 números y un punto), y que la foto sea una URL de Cloudinary.
+- El login es común para usuarios y chefs.
+
+---
 
 ## Modelos de Datos (MongoDB)
 
 ### Usuario (`User`)
 - **name**: Nombre completo del usuario (`String`)
 - **email**: Correo electrónico único (`String`)
+- **phone**: Número telefónico (`String`)
+- **identification**: Identificación (solo usuarios) (`String`)
 - **password**: Contraseña cifrada (`String`)
 - **role**: Rol del usuario (`String`, valores: `user`, `chef`)
 - **avatar**: URL de la imagen de perfil (`String`)
@@ -61,6 +73,9 @@
 
 ### Perfil de Chef (`ChefProfile`)
 - **user**: Referencia al usuario (`ObjectId` → `User`)
+- **contactPerson**: Persona de contacto (`String`)
+- **location**: Ubicación del establecimiento (`String`)
+- **cuisineType**: Tipo de cocina que ofrece (`String`)
 - **bio**: Biografía del chef (`String`)
 - **experience**: Experiencia o especialidad (`String`)
 - **socialLinks**: Enlaces a redes sociales (`[String]`)
@@ -106,3 +121,10 @@
 - **message**: Mensaje enviado (`String`)
 - **response**: Respuesta del soporte/chatbot (`String`)
 - **createdAt**: Fecha de creación (`Date`)
+
+---
+
+**Notas:**
+- Las imágenes deben ser subidas a Cloudinary desde el frontend y solo se almacena la URL en la base de datos.
+- Las validaciones de datos se realizan mediante middlewares antes de llegar a los controladores.
+- El registro de usuario y chef/restaurante son rutas separadas y cada una valida los campos requeridos según el tipo.
