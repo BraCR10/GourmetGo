@@ -20,10 +20,12 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chefRoutes = require('./routes/chefRoutes'); 
+const experienceRoutes = require('./routes/experienceRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chefs', chefRoutes);
+app.use('/api/experiences', experienceRoutes);
 
 // Ping endpoint
 app.get('/ping', (req, res) => {

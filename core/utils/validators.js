@@ -43,3 +43,22 @@ exports.validateChefUpdate = (fields) => {
   if (socialLinks && !Array.isArray(socialLinks)) return 'Las redes sociales deben ser un arreglo.';
   return null;
 };
+
+exports.validateExperience = (fields) => {
+  const { title, description, date, location, capacity, price, duration, category, images, status, menu } = fields;
+  if (!title || title.length < 3) return 'El nombre de la experiencia es obligatorio y debe tener al menos 3 caracteres.';
+  if (!description || description.length < 20) return 'La descripción es obligatoria y debe tener al menos 20 caracteres.';
+  if (!date || isNaN(Date.parse(date)) || new Date(date) < new Date()) return 'La fecha y hora son obligatorias y no pueden ser pasadas.';
+  if (!location || !/^https?:\/\/.+/.test(location)) return 'La ubicación debe ser un enlace válido.';
+  if (!capacity || !Number.isInteger(capacity) || capacity <= 0) return 'La capacidad máxima debe ser un número entero mayor a cero.';
+  if (!price || isNaN(price) || Number(price) <= 0) return 'El precio por persona debe ser mayor a cero.';
+  if (!duration || isNaN(duration) || Number(duration) <= 0) return 'La duración debe ser mayor a cero.';
+  if (!category) return 'La categoría es obligatoria.';
+  if (!images || !Array.isArray(images) || images.length === 0) return 'Debes subir al menos una imagen representativa.';
+  if (!['Activa', 'Agotada', 'Próximamente'].includes(status)) return 'El estado debe ser Activa, Agotada o Próximamente.';
+  // Validación de menú: al menos uno de los dos debe estar presente
+  if (!menu || (!menu.image && !menu.text)) return 'Debes incluir el menú como imagen o texto.';
+  if (menu.image && !menu.image.startsWith('https://res.cloudinary.com/')) return 'La imagen del menú debe ser una URL válida de Cloudinary.';
+  if (menu.text && menu.text.length < 10) return 'El texto del menú debe tener al menos 10 caracteres.';
+  return null;
+};
