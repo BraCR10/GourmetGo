@@ -62,3 +62,12 @@ exports.validateExperience = (fields) => {
   if (menu.text && menu.text.length < 10) return 'El texto del menú debe tener al menos 10 caracteres.';
   return null;
 };
+
+exports.validateExperienceEdit = ({ location, date, status, capacity, price }) => {
+  if (location !== undefined && !/^https?:\/\/.+/.test(location)) return 'La ubicación debe ser un enlace válido.';
+  if (date !== undefined && (isNaN(Date.parse(date)) || new Date(date) < new Date())) return 'La fecha y hora no pueden ser pasadas.';
+  if (capacity !== undefined && (!Number.isInteger(capacity) || capacity <= 0)) return 'La capacidad máxima debe ser un número entero mayor a cero.';
+  if (price !== undefined && (isNaN(price) || Number(price) <= 0)) return 'El precio por persona debe ser mayor a cero.';
+  if (status !== undefined && !['Activa', 'Agotada', 'Próximamente'].includes(status)) return 'El estado debe ser Activa, Agotada o Próximamente.';
+  return null;
+};
