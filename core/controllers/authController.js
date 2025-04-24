@@ -2,6 +2,7 @@ const User = require('../models/userSchema');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const chefController = require('./chefController');
+const mailer = require('../utils/mailer');
 const { validateUserRegistration, validateChefRegistration } = require('../utils/validators');
 
 // Normal user registration
@@ -24,6 +25,17 @@ exports.registerUser = async (req, res) => {
       role: 'user'
     });
     await user.save();
+
+    // Enviar correo de bienvenida
+    await mailer.sendMailTemplate(
+      user.email,
+      '¡Bienvenido a GourmetGo!',
+      'welcome-user.html',
+      {
+        name: user.name,
+        year: new Date().getFullYear()
+      }
+    );
 
     res.status(201).json({ message: 'Usuario registrado exitosamente.' });
   } catch (err) {
@@ -71,6 +83,16 @@ exports.registerChef = async (req, res) => {
       experience,
       socialLinks
     });
+
+    await mailer.sendMailTemplate(
+      user.email,
+      '¡Bienvenido a GourmetGo!',
+      'welcome-chef.html',
+      {
+        name: user.name,
+        year: new Date().getFullYear()
+      }
+    );
 
     res.status(201).json({ message: 'Chef o restaurante registrado exitosamente.' });
   } catch (err) {
