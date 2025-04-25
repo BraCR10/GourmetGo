@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+
 const app = express();
 
 // Cors middleware
@@ -20,15 +21,18 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chefRoutes = require('./routes/chefRoutes'); 
+const experienceRoutes = require('./routes/experienceRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chefs', chefRoutes);
+app.use('/api/experiences', experienceRoutes);
 
 // Ping endpoint
 app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
 });
+
 
 // Middleware to serve static files (if needed)
 app.use(express.static('public'));
@@ -55,4 +59,3 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => {
   console.error('Error conneting to MongoDB:', err);
 });
-
