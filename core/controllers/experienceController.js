@@ -45,7 +45,10 @@ exports.updateExperience = async (req, res) => {
     const experienceId = req.params.id;
     const { location, date, status, capacity, price } = req.body;
 
-    const experience = await Experience.findById(experienceId);
+    const experience = await Experience.findById(experienceId).populate({
+      path: 'chef',
+      populate: { path: 'user' }
+    });
     if (!experience) return res.status(404).json({ message: 'Experiencia no encontrada.' });
 
     if (status && experience.status === 'Próximamente' && status === 'Activa') {
@@ -60,6 +63,23 @@ exports.updateExperience = async (req, res) => {
     if (price !== undefined) experience.price = price;
 
     await experience.save();
+
+    // Enviar correo al chef notificando la actualización
+    const chefUser = experience.chef.user;
+    await mailer.sendMailTemplate(
+      chefUser.email,
+      '¡Tu experiencia ha sido actualizada!',
+      'experience-updated.html',
+      {
+        name: experience.chef.contactPerson || chefUser.name,
+        experienceTitle: experience.title,
+        date: experience.date.toLocaleString(),
+        location: experience.location,
+        capacity: experience.capacity,
+        price: experience.price,
+        year: new Date().getFullYear()
+      }
+    );
 
     res.json({ message: 'Experiencia actualizada correctamente.', experience });
   } catch (err) {
