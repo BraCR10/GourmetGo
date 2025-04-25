@@ -5,7 +5,7 @@ const { generateBookingCode, generateQRCodes } = require('../utils/bookingUtils'
 
 exports.createBooking = async (req, res) => {
   try {
-    const userId = req.user.userId; // <- del token JWT
+    const userId = req.user.userId;
     const { experienceId, people, name, email, phone, termsAccepted, paymentMethod } = req.body;
 
     // Validaciones básicas
@@ -23,16 +23,25 @@ exports.createBooking = async (req, res) => {
     const experience = await Experience.findById(experienceId);
     if (!experience) return res.status(404).json({ message: 'Experiencia no encontrada.' });
 
-    // Contar reservas existentes
-    const totalBooked = await Booking.aggregate([
-      { $match: { experience: experience._id } },
-      { $group: { _id: null, total: { $sum: "$people" } } }
-    ]);
-    const bookedCount = totalBooked[0]?.total || 0;
+    // Verificar si la experiencia está activa
+    if (experience.status !== 'Activa') {
+      return res.status(400).json({ message: 'La experiencia no está disponible para reservas.' });
+    }
 
     // Validar capacidad
-    if (bookedCount + people > experience.capacity) {
-      return res.status(400).json({ message: 'No hay suficientes cupos disponibles.' });
+    if (people > experience.remainingCapacity) {
+      return res.status(400).json({ message: 'No hay suficiente capacidad disponible.' });
+    }
+
+    const existingBooking = await Booking.findOne({
+      user: userId,
+      experience: experienceId,
+      name: name.trim()
+    });
+    if (existingBooking) {
+      return res.status(400).json({
+        message: 'Ya tienes una reservación para este evento con ese nombre. Usa un nombre diferente para otra reservación.'
+      });
     }
 
     // Generar código único y QRs
@@ -55,9 +64,10 @@ exports.createBooking = async (req, res) => {
     });
     await booking.save();
 
-    // (Opcional) Actualizar capacidad disponible (solo si quieres reflejarlo en el modelo)
-    // experience.capacity = experience.capacity - people;
-    // await experience.save();
+    // Actualizar capacidad restante de la experiencia
+    experience.remainingCapacity -= people;
+    await experience.save();
+
 
     // Enviar correo de confirmación
     await mailer.sendMailTemplate(
@@ -89,5 +99,22 @@ exports.getMyBookings = async (req, res) => {
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ message: 'Error al obtener las reservaciones.', error: err.message });
+  }
+};
+
+exports.getBookingDetail = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('user', 'name email avatar')
+      .populate('experience');
+    if (!booking) return res.status(404).json({ message: 'Reservación no encontrada.' });
+    
+    if (booking.user._id.toString() !== req.user.userId && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'No autorizado.' });
+    }
+
+    res.json(booking);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener el detalle de la reservación.', error: err.message });
   }
 };

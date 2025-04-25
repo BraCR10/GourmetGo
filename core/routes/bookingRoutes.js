@@ -9,4 +9,7 @@ router.post('/', auth, bookingController.createBooking);
 // Listar reservaciones del usuario autenticado
 router.get('/my', auth, bookingController.getMyBookings);
 
+// Detalle de reserva (requiere login)
+router.get('/:id', auth, bookingController.getBookingDetail);
+
 module.exports = router;
