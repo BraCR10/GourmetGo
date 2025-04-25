@@ -35,8 +35,8 @@
 - [X] `GET    /api/bookings`              — Listar reservas propias
 - [X] `POST   /api/bookings`              — Crear reserva
 - [X] `GET    /api/bookings/:id`          — Detalle de reserva
-- [ ] `PUT    /api/bookings/:id/cancel`   — Cancelar reserva
-- [ ] `GET    /api/chefs/:id/bookings`    — Reservas de mis experiencias (chef)
+- [X] `PUT    /api/bookings/:id/cancel`   — Cancelar reserva
+- [X] `GET    /api/chefs/:id/bookings`    — Reservas de mis experiencias (chef)
 
 ### Valoraciones
 - [ ] `POST   /api/ratings`               — Crear valoración

@@ -118,3 +118,69 @@ exports.getBookingDetail = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener el detalle de la reservación.', error: err.message });
   }
 };
+
+exports.cancelBooking = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const booking = await Booking.findOne({ _id: req.params.id, user: userId });
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Reservación no encontrada.' });
+    }
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ message: 'Solo puedes cancelar reservas pendientes.' });
+    }
+
+    booking.status = 'cancelled';
+    await booking.save();
+
+    const experience = await Experience.findById(booking.experience);
+    if (experience) {
+      experience.remainingCapacity += booking.people;
+      await experience.save();
+    }
+
+    // Enviar correo de cancelación
+    await mailer.sendMailTemplate(
+      booking.email,
+      'Reservación cancelada',
+      'booking-cancelled.html',
+      {
+        name: booking.name,
+        experienceTitle: experience ? experience.title : '',
+        date: experience ? experience.date.toLocaleString() : '',
+        people: booking.people,
+        bookingCode: booking.bookingCode,
+        year: new Date().getFullYear()
+      }
+    );
+
+    res.json({ message: 'Reservación cancelada exitosamente.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al cancelar la reservación.', error: err.message });
+  }
+};
+
+exports.getChefBookings = async (req, res) => {
+  try {
+    const chefId = req.params.id;
+
+    if (req.user.userId !== chefId && req.user.role !== 'chef') {
+      return res.status(403).json({ message: 'No autorizado.' });
+    } 
+
+    const experiences = await Experience.find({ chef: chefId });
+    if (!experiences || experiences.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron experiencias para este chef.' });
+    }
+
+    const experienceIds = experiences.map(exp => exp._id);
+    const bookings = await Booking.find({ experience: { $in: experienceIds } })
+      .populate('user', 'name email avatar')
+      .populate('experience', 'title date remainingCapacity');
+      
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener las reservaciones del chef.', error: err.message });
+  }
+};
