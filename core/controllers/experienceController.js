@@ -1,9 +1,20 @@
 const Experience = require('../models/experienceSchema'); 
+const { generateDeleteCode } = require('../utils/deleteCode');
+const ChefProfile = require('../models/chefProfileSchema');
+const mailer = require('../utils/mailer');
+const deleteCodes = new Map();
+const User = require('../models/userSchema');
 
 exports.createExperience = async (req, res) => {
   try {
-    const chefId = req.user.userId; 
-    const experienceData = { ...req.body, chef: chefId };
+    const userId = req.user.userId;
+
+    const chefProfile = await ChefProfile.findOne({ user: userId });
+    if (!chefProfile) {
+      return res.status(404).json({ message: 'Perfil de chef no encontrado.' });
+    }
+
+    const experienceData = { ...req.body, chef: chefProfile._id };
     const experience = new Experience(experienceData);
     await experience.save();
     res.status(201).json({ message: 'Experiencia creada exitosamente.', experience });
@@ -36,5 +47,101 @@ exports.updateExperience = async (req, res) => {
     res.json({ message: 'Experiencia actualizada correctamente.', experience });
   } catch (err) {
     res.status(500).json({ message: 'Error al actualizar la experiencia.', error: err.message });
+  }
+};
+
+
+exports.requestDeleteExperience = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email } = req.body;
+
+    // Validar que el correo electrónico sea del chef
+    const experience = await Experience.findById(id).populate('chef');
+
+    if (!experience) return res.status(404).json({ message: 'Experiencia no encontrada.' });
+    if (experience.status === 'Agotada') return res.status(400).json({ message: 'No se puede eliminar una experiencia agotada.' });
+
+    // Buscar el chef:
+    const chefProfile = await ChefProfile.findOne({ user: experience.chef.user._id });
+    if (!chefProfile) return res.status(404).json({ message: 'Perfil de chef no encontrado.' });
+
+    // Buscar el usuario del chef:
+    const chefUser = await User.findById(chefProfile.user);
+    if (!chefUser) return res.status(404).json({ message: 'Usuario del chef no encontrado.' });
+
+    const code = generateDeleteCode();
+    deleteCodes.set(`${id}:${email}`, code);
+
+    await mailer.sendMailTemplate(
+      email,
+      'Código de eliminación de experiencia',
+      'delete-experience-code.html',
+      {
+        contactPerson: chefUser.name,
+        experienceTitle: experience.title,
+        deleteCode: code,
+        year: new Date().getFullYear()
+      }
+    );
+
+    res.json({ message: 'Código de verificación enviado al correo.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al solicitar código de eliminación.', error: err.message });
+  }
+};
+
+exports.deleteExperience = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, code } = req.body;
+
+    // Buscar la experiencia y el perfil de chef asociado
+    const experience = await Experience.findById(id).populate('chef');
+    if (!experience) return res.status(404).json({ message: 'Experiencia no encontrada.' });
+    if (experience.status === 'Agotada') return res.status(400).json({ message: 'No se puede eliminar una experiencia agotada.' });
+
+    // Buscar el chefProfile y el usuario del chef
+    const chefProfile = await ChefProfile.findOne({ user: experience.chef.user });
+    if (!chefProfile) return res.status(404).json({ message: 'Perfil de chef no encontrado.' });
+
+    const chefUser = await User.findById(chefProfile.user);
+    if (!chefUser) return res.status(404).json({ message: 'Usuario del chef no encontrado.' });
+
+    // Validar correo
+    if (chefUser.email !== email) return res.status(403).json({ message: 'Correo no autorizado.' });
+
+    // Validar código
+    const storedCode = deleteCodes.get(`${id}:${email}`);
+    if (!storedCode || storedCode !== code) {
+      return res.status(400).json({ message: 'Código de verificación incorrecto o expirado.' });
+    }
+
+    // Eliminar experiencia y reservas asociadas
+    //await Booking.deleteMany({ experience: id });
+    await Experience.findByIdAndDelete(id);
+    deleteCodes.delete(`${id}:${email}`);
+
+    /*
+    // Notificar a usuarios con reservas
+    const bookings = await Booking.find({ experience: id }).populate('user');
+    for (const booking of bookings) {
+      await mailer.sendMailTemplate(
+        booking.user.email,
+        'Cancelación de experiencia',
+        'cancel-experience.html', 
+        {
+          name: booking.user.name,
+          experienceTitle: experience.title,
+          date: experience.date.toLocaleString(),
+          year: new Date().getFullYear()
+        }
+      );
+    }
+    */
+
+    res.json({ message: 'Experiencia eliminada y usuarios notificados.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al eliminar la experiencia.', error: err.message });
   }
 };
