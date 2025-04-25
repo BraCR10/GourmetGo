@@ -8,13 +8,11 @@
 - [x] `POST   /api/auth/register`         — Registro de usuario
 - [x] `POST   /api/auth/register-chef`    — Registro de chef/restaurante
 - [x] `POST   /api/auth/login`            — Inicio de sesión (usuarios y chefs)
-- [ ] `POST   /api/auth/logout`           — Cierre de sesión
-- [ ] `POST   /api/auth/refresh`          — Refrescar token
+
 
 ### Usuarios
 - [x] `PUT    /api/users/me`              — Actualizar perfil propio
 - [ ] `GET    /api/users/me`              — Obtener perfil propio
-- [ ] `DELETE /api/users/me`              — Eliminar cuenta
 - [ ] `GET    /api/users/:id`             — Obtener perfil público de usuario
 
 ### Chefs/Restaurantes

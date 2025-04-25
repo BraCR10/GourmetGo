@@ -2,6 +2,9 @@ const Booking = require('../models/bookingSchema');
 const Experience = require('../models/experienceSchema');
 const mailer = require('../utils/mailer');
 const { generateBookingCode, generateQRCodes } = require('../utils/bookingUtils');
+const { createBookingPDF } = require('../utils/pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 exports.createBooking = async (req, res) => {
   try {
@@ -69,7 +72,17 @@ exports.createBooking = async (req, res) => {
     await experience.save();
 
 
-    // Enviar correo de confirmación
+    // Generar PDF temporal
+    const pdfPath = path.join(__dirname, '..', 'extra', 'mail', `qr-${booking._id}.pdf`);
+    await createBookingPDF({
+      name,
+      experienceTitle: experience.title,
+      date: experience.date.toLocaleString(),
+      people,
+      qrCodes
+    }, pdfPath);
+
+    // Enviar correo con PDF adjunto
     await mailer.sendMailTemplate(
       email,
       'Confirmación de reservación',
@@ -81,10 +94,18 @@ exports.createBooking = async (req, res) => {
         people,
         paymentMethod,
         bookingCode,
-        qrCodesHtml: qrCodes.map(qr => `<img src="${qr}" width="120" />`).join(' '),
         year: new Date().getFullYear()
-      }
+      },
+      [
+        {
+          filename: 'entradas.pdf',
+          path: pdfPath
+        }
+      ]
     );
+
+    // Elimina el PDF temporal después de enviar
+    fs.unlink(pdfPath, () => {});
 
     res.status(201).json({ message: 'Reservación realizada exitosamente.', booking });
   } catch (err) {
