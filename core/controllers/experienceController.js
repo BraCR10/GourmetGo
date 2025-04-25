@@ -9,7 +9,7 @@ exports.createExperience = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const chefProfile = await ChefProfile.findOne({ user: userId });
+    const chefProfile = await ChefProfile.findOne({ user: userId }).populate('user');
     if (!chefProfile) {
       return res.status(404).json({ message: 'Perfil de chef no encontrado.' });
     }
@@ -17,6 +17,23 @@ exports.createExperience = async (req, res) => {
     const experienceData = { ...req.body, chef: chefProfile._id };
     const experience = new Experience(experienceData);
     await experience.save();
+
+    // Enviar correo al chef
+    await mailer.sendMailTemplate(
+      chefProfile.user.email,
+      '¡Tu experiencia ha sido publicada!',
+      'experience-created.html',
+      {
+        name: chefProfile.contactPerson || chefProfile.user.name,
+        experienceTitle: experience.title,
+        date: experience.date.toLocaleString(),
+        location: experience.location,
+        capacity: experience.capacity,
+        price: experience.price,
+        year: new Date().getFullYear()
+      }
+    );
+
     res.status(201).json({ message: 'Experiencia creada exitosamente.', experience });
   } catch (err) {
     res.status(500).json({ message: 'Error al crear la experiencia.', error: err.message });
