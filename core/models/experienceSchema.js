@@ -6,6 +6,7 @@ const ExperienceSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   location: { type: String, required: true }, // URL
   capacity: { type: Number, required: true, min: 1 },
+  remainingCapacity: { type: Number, required: true, min: 0 },
   price: { type: Number, required: true, min: 0.01 },
   duration: { type: Number, required: true, min: 0.1 }, // horas, puede ser decimal
   category: { type: String, required: true },

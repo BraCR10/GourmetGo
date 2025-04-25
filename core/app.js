@@ -22,11 +22,13 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chefRoutes = require('./routes/chefRoutes'); 
 const experienceRoutes = require('./routes/experienceRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chefs', chefRoutes);
 app.use('/api/experiences', experienceRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Ping endpoint
 app.get('/ping', (req, res) => {

@@ -24,3 +24,23 @@ exports.updateMe = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar el perfil.', error: err.message });
   }
 };
+
+exports.getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener el perfil.', error: err.message });
+  }
+};
+
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('name avatar preferences');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener el perfil público.', error: err.message });
+  }
+};

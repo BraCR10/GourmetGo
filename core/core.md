@@ -8,13 +8,11 @@
 - [x] `POST   /api/auth/register`         — Registro de usuario
 - [x] `POST   /api/auth/register-chef`    — Registro de chef/restaurante
 - [x] `POST   /api/auth/login`            — Inicio de sesión (usuarios y chefs)
-- [ ] `POST   /api/auth/logout`           — Cierre de sesión
-- [ ] `POST   /api/auth/refresh`          — Refrescar token
+
 
 ### Usuarios
 - [x] `PUT    /api/users/me`              — Actualizar perfil propio
 - [ ] `GET    /api/users/me`              — Obtener perfil propio
-- [ ] `DELETE /api/users/me`              — Eliminar cuenta
 - [ ] `GET    /api/users/:id`             — Obtener perfil público de usuario
 
 ### Chefs/Restaurantes
@@ -24,27 +22,23 @@
 - [ ] `GET    /api/chefs/:id/experiences` — Listar experiencias de un chef
 
 ### Experiencias
-- [x] `GET    /api/experiences`           — Listar experiencias (con filtros)
+- [ ] `GET    /api/experiences`           — Listar experiencias (con filtros)
 - [x] `POST   /api/experiences`           — Crear experiencia (chef)
-- [x] `GET    /api/experiences/:id`       — Detalle de experiencia
+- [ ] `GET    /api/experiences/:id`       — Detalle de experiencia
 - [x] `PUT    /api/experiences/:id`       — Editar experiencia (chef, solo campos permitidos)
 - [x] `POST   /api/experiences/:id/request-delete` — Solicitar código para eliminar experiencia
 - [x] `DELETE /api/experiences/:id`       — Eliminar experiencia (chef, requiere código)
 
 ### Reservas
-- [ ] `GET    /api/bookings`              — Listar reservas propias
-- [ ] `POST   /api/bookings`              — Crear reserva
-- [ ] `GET    /api/bookings/:id`          — Detalle de reserva
-- [ ] `PUT    /api/bookings/:id/cancel`   — Cancelar reserva
-- [ ] `GET    /api/chefs/:id/bookings`    — Reservas de mis experiencias (chef)
+- [X] `GET    /api/bookings`              — Listar reservas propias
+- [X] `POST   /api/bookings`              — Crear reserva
+- [X] `GET    /api/bookings/:id`          — Detalle de reserva
+- [X] `PUT    /api/bookings/:id/cancel`   — Cancelar reserva
+- [X] `GET    /api/chefs/:id/bookings`    — Reservas de mis experiencias (chef)
 
 ### Valoraciones
 - [ ] `POST   /api/ratings`               — Crear valoración
 - [ ] `GET    /api/experiences/:id/ratings` — Valoraciones de una experiencia
-
-### Pagos
-- [ ] `POST   /api/payments`              — Procesar pago de reserva
-- [ ] `GET    /api/payments/:id/status`   — Estado de pago
 
 ### Soporte/Chatbot
 - [ ] `POST   /api/support/message`       — Enviar mensaje al soporte/chatbot
@@ -107,9 +101,15 @@
 ### Reserva (`Booking`)
 - `user`: Referencia al usuario (`ObjectId` → `User`)
 - `experience`: Referencia a la experiencia (`ObjectId` → `Experience`)
-- `status`: Estado (`String`: `pending`, `confirmed`, `cancelled`)
-- `qrCode`: Código QR (`String`)
-- `payment`: Referencia al pago (`ObjectId` → `Payment`)
+- `status`: Estado de la reservación (`String`):
+  - `pending`: Reservación creada, esperando a que ocurra el evento.
+  - `confirmed`: Asistencia confirmada por el chef/organizador.
+  - `cancelled`: Reservación cancelada por el usuario o el sistema.
+  - `expired` (opcional): El evento ya pasó y la reservación no fue confirmada.
+- `qrCodes`: Array de códigos QR (`[String]`)
+- `bookingCode`: Código único de reservación (`String`)
+- `termsAccepted`: Confirmación de términos y condiciones (`Boolean`)
+- `paymentMethod`: Método de pago elegido (`String`: `Pago en el lugar` o `Transferencia`)
 - `createdAt`: Fecha de creación (`Date`)
 
 ### Valoración (`Rating`)

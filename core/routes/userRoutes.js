@@ -4,7 +4,10 @@ const userController = require('../controllers/userController');
 const validateUserUpdate = require('../middlewares/validateUserUpdate');
 const auth = require('../middlewares/auth');
 
-
 router.put('/me', auth, validateUserUpdate, userController.updateMe);
+
+router.get('/me', auth, userController.getMyProfile);
+
+router.get('/:id', userController.getPublicProfile);
 
 module.exports = router;

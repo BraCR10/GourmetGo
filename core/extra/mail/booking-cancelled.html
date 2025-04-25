@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reservación cancelada</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; color: #222; }
+    .container { background: #fff; max-width: 520px; margin: 40px auto; border-radius: 10px; box-shadow: 0 2px 12px #e0e0e0; padding: 36px 32px; }
+    .highlight { color: #c00; font-weight: bold; }
+    .section { margin: 24px 0 16px 0; }
+    .footer { margin-top: 36px; font-size: 0.95em; color: #888; text-align: center; }
+    .details-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .details-table td { padding: 6px 0; }
+    .details-table .label { color: #888; width: 160px; }
+    .code { font-size: 1.1em; letter-spacing: 2px; background: #f0f0f0; padding: 6px 14px; border-radius: 6px; display: inline-block; margin: 6px 0; color: #c00; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Reservación cancelada</h2>
+    <p>Hola <b>{{name}}</b>,</p>
+    <p>
+      Tu reservación para la experiencia <span class="highlight">"{{experienceTitle}}"</span> ha sido <b>cancelada</b> exitosamente.
+    </p>
+    <div class="section">
+      <table class="details-table">
+        <tr>
+          <td class="label">Fecha:</td>
+          <td>{{date}}</td>
+        </tr>
+        <tr>
+          <td class="label">Cantidad de personas:</td>
+          <td>{{people}}</td>
+        </tr>
+        <tr>
+          <td class="label">Código de reservación:</td>
+          <td><span class="code">{{bookingCode}}</span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="section" style="margin-top:28px;">
+      Si tienes dudas o fue un error, puedes volver a reservar desde la plataforma.<br>
+      ¡Gracias por confiar en GourmetGo!
+    </div>
+    <div class="footer">
+      GourmetGo &copy; {{year}}
+    </div>
+  </div>
+</body>
+</html>

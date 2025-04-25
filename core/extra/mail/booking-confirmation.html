@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>¡Reservación confirmada!</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; color: #222; }
+    .container { background: #fff; max-width: 520px; margin: 40px auto; border-radius: 10px; box-shadow: 0 2px 12px #e0e0e0; padding: 36px 32px; }
+    .highlight { color: #0a7ea4; font-weight: bold; }
+    .section { margin: 24px 0 16px 0; }
+    .qr-list { margin: 18px 0 0 0; text-align: center; }
+    .qr-list img { margin: 8px 12px 8px 0; border-radius: 8px; border: 1px solid #eee; background: #fafafa; box-shadow: 0 1px 4px #ddd; }
+    .code { font-size: 1.3em; letter-spacing: 2px; background: #f0f0f0; padding: 8px 18px; border-radius: 6px; display: inline-block; margin: 10px 0; color: #0a7ea4; }
+    .footer { margin-top: 36px; font-size: 0.95em; color: #888; text-align: center; }
+    .details-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .details-table td { padding: 6px 0; }
+    .details-table .label { color: #888; width: 160px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>¡Tu reservación está confirmada!</h2>
+    <p>Hola <b>{{name}}</b>,</p>
+    <p>
+      Has reservado exitosamente para la experiencia <span class="highlight">"{{experienceTitle}}"</span>.
+    </p>
+    <div class="section">
+      <table class="details-table">
+        <tr>
+          <td class="label">Fecha:</td>
+          <td>{{date}}</td>
+        </tr>
+        <tr>
+          <td class="label">Cantidad de personas:</td>
+          <td>{{people}}</td>
+        </tr>
+        <tr>
+          <td class="label">Método de pago:</td>
+          <td>{{paymentMethod}}</td>
+        </tr>
+        <tr>
+          <td class="label">Código de reservación:</td>
+          <td><span class="code">{{bookingCode}}</span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="section">
+      <b>Entradas QR para tu acceso:</b>
+      <div class="qr-list">
+        Tus códigos QR están adjuntos en el archivo PDF de este correo.
+      </div>
+    </div>
+    <div class="section" style="margin-top:28px;">
+      <span style="color:#0a7ea4;">Recuerda:</span> Presenta tu(s) QR al ingresar al evento.<br>
+      Si tienes dudas, responde a este correo o contáctanos desde la plataforma.
+    </div>
+    <div class="footer">
+      GourmetGo &copy; {{year}}
+    </div>
+  </div>
+</body>
+</html>

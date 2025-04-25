@@ -16,6 +16,7 @@ exports.createExperience = async (req, res) => {
 
     const experienceData = { ...req.body, chef: chefProfile._id };
     const experience = new Experience(experienceData);
+    experience.remainingCapacity = experience.capacity; 
     await experience.save();
 
     // Enviar correo al chef
@@ -29,6 +30,8 @@ exports.createExperience = async (req, res) => {
         date: experience.date.toLocaleString(),
         location: experience.location,
         capacity: experience.capacity,
+        duration: experience.duration,
+        description: experience.description,
         price: experience.price,
         year: new Date().getFullYear()
       }
