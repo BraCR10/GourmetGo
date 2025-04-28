@@ -12,14 +12,14 @@
 
 ### Usuarios
 - [x] `PUT    /api/users/me`              — Actualizar perfil propio
-- [ ] `GET    /api/users/me`              — Obtener perfil propio
-- [ ] `GET    /api/users/:id`             — Obtener perfil público de usuario
+- [X] `GET    /api/users/me`              — Obtener perfil propio
+- [X] `GET    /api/users/:id`             — Obtener perfil público de usuario
 
 ### Chefs/Restaurantes
 - [x] `GET    /api/chefs`                 — Listar chefs/restaurantes
 - [x] `GET    /api/chefs/:id`             — Detalle de chef/restaurante
 - [x] `PUT    /api/chefs/me`              — Actualizar perfil de chef (solo dueño)
-- [ ] `GET    /api/chefs/:id/experiences` — Listar experiencias de un chef
+- [X] `GET    /api/chefs/:id/experiences` — Listar experiencias de un chef
 
 ### Experiencias
 - [X] `GET    /api/experiences`           — Listar experiencias (con filtros)
