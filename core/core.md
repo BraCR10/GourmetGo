@@ -37,8 +37,8 @@
 - [X] `GET    /api/chefs/:id/bookings`    — Reservas de mis experiencias (chef)
 
 ### Valoraciones
-- [ ] `POST   /api/ratings`               — Crear valoración
-- [ ] `GET    /api/experiences/:id/ratings` — Valoraciones de una experiencia
+- [X] `POST   /api/ratings`               — Crear valoración
+- [X] `GET    /api/experiences/:id/ratings` — Valoraciones de una experiencia
 
 ### Soporte/Chatbot
 - [ ] `POST   /api/support/message`       — Enviar mensaje al soporte/chatbot
