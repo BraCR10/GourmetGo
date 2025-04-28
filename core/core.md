@@ -22,9 +22,9 @@
 - [ ] `GET    /api/chefs/:id/experiences` — Listar experiencias de un chef
 
 ### Experiencias
-- [ ] `GET    /api/experiences`           — Listar experiencias (con filtros)
+- [X] `GET    /api/experiences`           — Listar experiencias (con filtros)
 - [x] `POST   /api/experiences`           — Crear experiencia (chef)
-- [ ] `GET    /api/experiences/:id`       — Detalle de experiencia
+- [X] `GET    /api/experiences/:id`       — Detalle de experiencia
 - [x] `PUT    /api/experiences/:id`       — Editar experiencia (chef, solo campos permitidos)
 - [x] `POST   /api/experiences/:id/request-delete` — Solicitar código para eliminar experiencia
 - [x] `DELETE /api/experiences/:id`       — Eliminar experiencia (chef, requiere código)

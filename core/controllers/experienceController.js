@@ -131,6 +131,7 @@ exports.requestDeleteExperience = async (req, res) => {
   }
 };
 
+
 exports.deleteExperience = async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,31 +158,55 @@ exports.deleteExperience = async (req, res) => {
       return res.status(400).json({ message: 'Código de verificación incorrecto o expirado.' });
     }
 
-    // Eliminar experiencia y reservas asociadas
-    //await Booking.deleteMany({ experience: id });
-    await Experience.findByIdAndDelete(id);
-    deleteCodes.delete(`${id}:${email}`);
-
-    /*
-    // Notificar a usuarios con reservas
-    const bookings = await Booking.find({ experience: id }).populate('user');
+    // Notificar a usuarios con reservas activas
+    const bookings = await Booking.find({ experience: id, status: { $in: ['pending', 'confirmed'] } }).populate('user');
     for (const booking of bookings) {
       await mailer.sendMailTemplate(
-        booking.user.email,
+        booking.email,
         'Cancelación de experiencia',
-        'cancel-experience.html', 
+        'cancel-experience.html',
         {
-          name: booking.user.name,
+          name: booking.name,
           experienceTitle: experience.title,
           date: experience.date.toLocaleString(),
           year: new Date().getFullYear()
         }
       );
+      // Opcional: marcar la reserva como cancelada
+      booking.status = 'cancelled';
+      await booking.save();
     }
-    */
+
+    // Eliminar experiencia
+    await Experience.findByIdAndDelete(id);
+    deleteCodes.delete(`${id}:${email}`);
 
     res.json({ message: 'Experiencia eliminada y usuarios notificados.' });
-  } catch (err) {
+  } catch (err) { 
     res.status(500).json({ message: 'Error al eliminar la experiencia.', error: err.message });
+  }
+};
+
+exports.listExperiences = async (req, res) => {
+  try {
+    const { q, chef, date } = req.query;
+    const filter = {};
+    if (q) filter.title = { $regex: q, $options: 'i' };
+    if (chef) filter.chef = chef;
+    if (date) filter.date = date;
+    const experiences = await Experience.find(filter).populate('chef', 'name');
+    res.json(experiences);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al listar experiencias.', error: err.message });
+  }
+};
+
+exports.getExperienceDetail = async (req, res) => {
+  try {
+    const experience = await Experience.findById(req.params.id).populate('chef', 'name');
+    if (!experience) return res.status(404).json({ message: 'Experiencia no encontrada.' });
+    res.json(experience);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener la experiencia.', error: err.message });
   }
 };
