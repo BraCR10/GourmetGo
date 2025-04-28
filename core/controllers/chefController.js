@@ -1,5 +1,6 @@
 const ChefProfile = require('../models/chefProfileSchema');
 const { validateChefUpdate } = require('../utils/validators');
+const Experience = require('../models/experienceSchema');
 
 exports.createChefProfile = async ({ userId, contactPerson, location, cuisineType, bio, experience, socialLinks }) => {
   const chefProfile = new ChefProfile({
@@ -43,6 +44,16 @@ exports.updateMe = async (req, res) => {
     res.json({ message: 'Perfil de chef actualizado correctamente.', chef: chefProfile });
   } catch (err) {
     res.status(500).json({ message: 'Error al actualizar el perfil de chef.', error: err.message });
+  }
+};
+
+exports.getChefExperiences = async (req, res) => {
+  try {
+    const chefId = req.params.id;
+    const experiences = await Experience.find({ chef: chefId });
+    res.json(experiences);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al obtener las experiencias del chef.', error: err.message });
   }
 };
 
