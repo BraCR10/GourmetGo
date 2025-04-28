@@ -17,5 +17,10 @@ router.post('/:id/request-delete', auth, experienceController.requestDeleteExper
 // Eliminar experiencia (requiere código)
 router.delete('/:id', auth, experienceController.deleteExperience);
 
+// Listar experiencias (con filtros opcionales: ?q=, ?chef=, ?date=, etc)
+router.get('/', experienceController.listExperiences);
+
+// Detalle de experiencia por ID
+router.get('/:id', experienceController.getExperienceDetail);
 
 module.exports = router;
