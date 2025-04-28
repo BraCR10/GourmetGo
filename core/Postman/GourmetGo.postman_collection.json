@@ -1,0 +1,599 @@
+{
+	"info": {
+		"_postman_id": "3467bdbb-6f48-4853-b0d1-0821a54d4849",
+		"name": "GourmetGo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "30323689"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Juan Pérez\",\r\n  \"email\": \"juan.perez@email.com\",\r\n  \"phone\": \"88887777\",\r\n  \"identification\": \"123456789\",\r\n  \"password\": \"abcdeF.1234\",\r\n  \"photoUrl\": \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/ejemplo.jpg\",\r\n  \"preferences\": [\"Italiana\", \"Vegana\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Register Chef",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Restaurante La Sabrosa\",\r\n  \"contactPerson\": \"María López\",\r\n  \"email\": \"adbyb.es@gmail.com\",\r\n  \"phone\": \"88889999\",\r\n  \"location\": \"San José, Costa Rica\",\r\n  \"cuisineType\": \"Fusión\",\r\n  \"password\": \"abcdeF.1234\",\r\n  \"photoUrl\": \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/chef.jpg\",\r\n  \"bio\": \"Chef con 10 años de experiencia en cocina internacional.\",\r\n  \"experience\": \"10 años\",\r\n  \"socialLinks\": [\"https://instagram.com/lasabrosa\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/auth/register-chef"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"juan.perez@email.com\",\r\n  \"password\": \"abcdeF.1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/auth/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTUzNjEzOCwiZXhwIjoxNzQ1NjIyNTM4fQ.nTuh3On3s3Yr8Ui4sye7pGLfeMNfjY5b6U_6Syo2CjY"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"juan.perez@email.com\",\r\n  \"phone\": \"88887777\",\r\n  \"identification\": \"987654321\",\r\n  \"photoUrl\": \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/ejemplo.jpg\",\r\n  \"preferences\": [\"Vegana\", \"Japonesa\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/users/me"
+					},
+					"response": []
+				},
+				{
+					"name": "Get me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTU2MDA3NCwiZXhwIjoxNzQ1NjQ2NDc0fQ.4TwVl-tsnWi2IMo4kEQhnmhTYaTEpQuS0-SwfKTXDuY"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/users/me"
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680abe6190ad504d08ea38e3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chefs / Restaurantes",
+			"item": [
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmZlYTkwYWQ1MDRkMDhlYTM4ZTYiLCJyb2xlIjoiY2hlZiIsImlhdCI6MTc0NTUzNjQ3NCwiZXhwIjoxNzQ1NjIyODc0fQ.uoD26ku9nlrAGBUJu_xWkDl4bSt4qxfF92erH4L9q_4"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"contactPerson\": \"Ana Vargas\",\r\n  \"phone\": \"88885555\",\r\n  \"location\": \"Cartago, Costa Rica\",\r\n  \"cuisineType\": \"Internacional\",\r\n  \"photoUrl\": \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/chef2.jpg\",\r\n  \"bio\": \"Chef con experiencia en cocina internacional.\",\r\n  \"experience\": \"7 años\",\r\n  \"socialLinks\": [\"https://facebook.com/chefana\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/chefs/me"
+					},
+					"response": []
+				},
+				{
+					"name": "Experiences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/chefs/:id/experiences",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"chefs",
+								":id",
+								"experiences"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680acfddc5478bc141d293d1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Experiences",
+			"item": [
+				{
+					"name": "Create Experience",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhY2ZkZGM1NDc4YmMxNDFkMjkzY2YiLCJyb2xlIjoiY2hlZiIsImlhdCI6MTc0NTU2MDQyNiwiZXhwIjoxNzQ1NjQ2ODI2fQ.ZJGP5fo5OcuVcHR_mBAkCRcNskO6PEkH31xBl-IeTBo"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Taller de Sushi para Principiantes\",\r\n  \"description\": \"Aprende a preparar sushi tradicional japonés con ingredientes frescos y técnicas auténticas. Incluye degustación y certificado.\",\r\n  \"date\": \"2025-05-20T19:00:00Z\",\r\n  \"location\": \"https://maps.google.com/?q=sushi+workshop\",\r\n  \"capacity\": 15,\r\n  \"price\": 250.00,\r\n  \"duration\": 3,\r\n  \"category\": \"Taller\",\r\n  \"images\": [\r\n    \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/sushi1.jpg\",\r\n    \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/sushi2.jpg\"\r\n  ],\r\n  \"requirements\": \"Traer delantal y muchas ganas de aprender.\",\r\n  \"status\": \"Activa\",\r\n  \"menu\": {\r\n    \"image\": \"https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/menu.jpg\",\r\n    \"text\": \"Entradas: Maki roll, Plato fuerte: Nigiri, Postre: Mochi\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/experiences"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Experience",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmZlYTkwYWQ1MDRkMDhlYTM4ZTYiLCJyb2xlIjoiY2hlZiIsImlhdCI6MTc0NTUzNjQ3NCwiZXhwIjoxNzQ1NjIyODc0fQ.uoD26ku9nlrAGBUJu_xWkDl4bSt4qxfF92erH4L9q_4"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"https://maps.google.com/?q=nueva+ubicacion\",\r\n  \"date\": \"2025-06-10T19:00:00Z\",\r\n  \"status\": \"Activa\",\r\n  \"capacity\": 10,\r\n  \"price\": 300.00\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/experiences/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiences",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmZlYTkwYWQ1MDRkMDhlYTM4ZTYiLCJyb2xlIjoiY2hlZiIsImlhdCI6MTc0NTUzNjQ3NCwiZXhwIjoxNzQ1NjIyODc0fQ.uoD26ku9nlrAGBUJu_xWkDl4bSt4qxfF92erH4L9q_4"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"adbyb.es@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/experiences/:id/request-delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								"request-delete"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Confirm",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhY2ZkZGM1NDc4YmMxNDFkMjkzY2YiLCJyb2xlIjoiY2hlZiIsImlhdCI6MTc0NTUzOTY4NywiZXhwIjoxNzQ1NjI2MDg3fQ.v0i0Mt5CYK5A6bk-UjVRlfBb0-axzMLtVAXCfwPsSnQ"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"adbyb.es@gmail.com\",\r\n    \"code\": \"8682Z2S\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/experiences/:id/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiences",
+								":id",
+								""
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List experiences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/experiences"
+					},
+					"response": []
+				},
+				{
+					"name": "List specific experience",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/experiences/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiences",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680b23e13500ac660494f982"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Booking",
+			"item": [
+				{
+					"name": "Book experience",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTU5NzEzOCwiZXhwIjoxNzQ1NjgzNTM4fQ.vKALhuX-MU2805LDG89K7be0WNhGUMKL0SlylGPo6KE"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"experienceId\": \"680b23e13500ac660494f982\",\r\n  \"people\": 1,\r\n  \"name\": \"Nati\",\r\n  \"email\": \"adbyb.es@gmail.com\",\r\n  \"phone\": \"88889999\",\r\n  \"termsAccepted\": true,\r\n  \"paymentMethod\": \"Pago en el lugar\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/bookings"
+					},
+					"response": []
+				},
+				{
+					"name": "Get my bookings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTU2MDk5MiwiZXhwIjoxNzQ1NjQ3MzkyfQ.Ti88JQ-6ZLqEgcqmqc7aa9uZC2IHSq33GWQ0yDl4W98"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/bookings/my"
+					},
+					"response": []
+				},
+				{
+					"name": "Book detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTU2MDk5MiwiZXhwIjoxNzQ1NjQ3MzkyfQ.Ti88JQ-6ZLqEgcqmqc7aa9uZC2IHSq33GWQ0yDl4W98"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/bookings/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"bookings",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680b2777cc41524941a31a0f"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel booking",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTU2MDk5MiwiZXhwIjoxNzQ1NjQ3MzkyfQ.Ti88JQ-6ZLqEgcqmqc7aa9uZC2IHSq33GWQ0yDl4W98"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/bookings/:id/cancel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"bookings",
+								":id",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680b276bcc41524941a31a08"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chef bookings Experience",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/bookings/chefs/:id/bookings",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"bookings",
+								"chefs",
+								":id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get ratings from experiences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/ratings/experience/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"ratings",
+								"experience",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "680b23e13500ac660494f982"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Rating",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODBhYmU2MTkwYWQ1MDRkMDhlYTM4ZTMiLCJyb2xlIjoidXNlciIsImlhdCI6MTc0NTgwNzc2OSwiZXhwIjoxNzQ1ODk0MTY5fQ.7Y_3crnjVJZqf4eHZvnTae-RPn-ZvQMfAjz3osjb8zE"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"experienceId\": \"680b23e13500ac660494f982\",\r\n  \"score\": 5,\r\n  \"comment\": \"¡Excelente experiencia!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:3000/api/ratings"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ping",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:3000/ping"
+			},
+			"response": []
+		}
+	]
+}
