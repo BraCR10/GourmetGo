@@ -1,4 +1,4 @@
-package gourmetgo.client.ui.slideshow
+package gourmetgo.client.viewmodel.example
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
