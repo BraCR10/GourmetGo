@@ -57,7 +57,7 @@ object UserMockup {
 
     fun getAllUsers(): List<User> = testUsers
 
-    fun getUserByEmail(email: String): User? =
+    private fun getUserByEmail(email: String): User? =
         testUsers.find { it.email.equals(email, ignoreCase = true) }
 
     fun getUserById(id: String): User? =
