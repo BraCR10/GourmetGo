@@ -66,7 +66,6 @@ fun LoginScreen(
     ) {
         LoginHeader()
 
-        // Campo de email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },

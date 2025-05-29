@@ -43,7 +43,6 @@ fun ExperienceCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header con título y categoría
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -81,7 +80,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Descripción
             Text(
                 text = experience.description,
                 fontSize = 14.sp,
@@ -91,7 +89,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Información de ubicación y duración
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -135,7 +132,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Capacidad y precio
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,7 +162,6 @@ fun ExperienceCard(
                 )
             }
 
-            // Estado visual si no está activa
             if (experience.status != "Activa") {
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
@@ -198,7 +193,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Botón de reserva
             Button(
                 onClick = onBookClick,
                 modifier = Modifier.fillMaxWidth(),

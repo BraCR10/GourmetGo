@@ -20,69 +20,69 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import gourmetgo.client.viewmodel.ExperiencesViewModel
-import gourmetgo.client.viewmodel.factories.ExperiencesViewModelFactory
 import gourmetgo.client.ui.components.ExperienceCard
+import gourmetgo.client.ui.components.FilterChip
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExperiencesScreen(
+    viewModel: ExperiencesViewModel,
     onNavigateToProfile: () -> Unit,
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val experiencesViewModel: ExperiencesViewModel = viewModel(
-        factory = ExperiencesViewModelFactory(context)
-    )
-    val uiState = experiencesViewModel.uiState
+    val uiState = viewModel.uiState
     val focusManager = LocalFocusManager.current
 
     var searchText by remember { mutableStateOf("") }
 
-    // Mostrar errores como Toast
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            experiencesViewModel.clearError()
+            viewModel.clearError()
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Top App Bar
-        TopAppBar(
-            title = {
-                Text(
-                    text = "GourmetGo",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            actions = {
-                IconButton(onClick = onNavigateToProfile) {
-                    Icon(
-                        Icons.Default.AccountCircle,
-                        contentDescription = "Perfil"
+    Scaffold(
+        topBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                tonalElevation = 3.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "GourmetGo",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 20.sp
                     )
+                    Row {
+                        IconButton(onClick = onNavigateToProfile) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Perfil",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        IconButton(onClick = onLogout) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ExitToApp,
+                                contentDescription = "Cerrar Sesión",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 }
-                IconButton(onClick = onLogout) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = "Cerrar Sesión"
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        )
-
-        // Contenido principal
+            }
+        }
+    ) { paddingValues ->
         if (uiState.isLoading && uiState.experiences.isEmpty()) {
-            // Estado de carga inicial
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -97,9 +97,10 @@ fun ExperiencesScreen(
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                // Barra de búsqueda
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,7 +112,7 @@ fun ExperiencesScreen(
                         onValueChange = {
                             searchText = it
                             if (it.isBlank()) {
-                                experiencesViewModel.clearSearch()
+                                viewModel.clearSearch()
                             }
                         },
                         label = { Text("Buscar experiencias...") },
@@ -122,7 +123,7 @@ fun ExperiencesScreen(
                             if (searchText.isNotEmpty()) {
                                 IconButton(onClick = {
                                     searchText = ""
-                                    experiencesViewModel.clearSearch()
+                                    viewModel.clearSearch()
                                     focusManager.clearFocus()
                                 }) {
                                     Icon(Icons.Default.Clear, contentDescription = "Limpiar")
@@ -135,7 +136,7 @@ fun ExperiencesScreen(
                         keyboardActions = KeyboardActions(
                             onSearch = {
                                 if (searchText.isNotBlank()) {
-                                    experiencesViewModel.searchExperiences(searchText)
+                                    viewModel.searchExperiences(searchText)
                                 }
                                 focusManager.clearFocus()
                             }
@@ -147,7 +148,6 @@ fun ExperiencesScreen(
                     )
                 }
 
-                // Filtros por categoría
                 if (uiState.categories.isNotEmpty() && uiState.searchQuery.isBlank()) {
                     LazyRow(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -155,14 +155,14 @@ fun ExperiencesScreen(
                     ) {
                         item {
                             FilterChip(
-                                onClick = { experiencesViewModel.clearCategoryFilter() },
+                                onClick = { viewModel.clearCategoryFilter() },
                                 label = { Text("Todas") },
                                 selected = uiState.selectedCategory == null
                             )
                         }
                         items(uiState.categories) { category ->
                             FilterChip(
-                                onClick = { experiencesViewModel.filterByCategory(category) },
+                                onClick = { viewModel.filterByCategory(category) },
                                 label = { Text(category) },
                                 selected = uiState.selectedCategory == category
                             )
@@ -171,11 +171,9 @@ fun ExperiencesScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // Lista de experiencias
-                val experiencesToShow = experiencesViewModel.getCurrentExperiences()
+                val experiencesToShow = viewModel.getCurrentExperiences()
 
                 if (experiencesToShow.isEmpty() && !uiState.isLoading) {
-                    // Estado vacío
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -215,8 +213,8 @@ fun ExperiencesScreen(
                                 Button(
                                     onClick = {
                                         searchText = ""
-                                        experiencesViewModel.clearSearch()
-                                        experiencesViewModel.clearCategoryFilter()
+                                        viewModel.clearSearch()
+                                        viewModel.clearCategoryFilter()
                                     }
                                 ) {
                                     Text("Ver todas las experiencias")
@@ -230,7 +228,6 @@ fun ExperiencesScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Título de sección
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -238,7 +235,7 @@ fun ExperiencesScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = experiencesViewModel.getCurrentSectionTitle(),
+                                    text = viewModel.getCurrentSectionTitle(),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -253,18 +250,16 @@ fun ExperiencesScreen(
                             }
                         }
 
-                        // Lista de experiencias
                         items(experiencesToShow) { experience ->
                             ExperienceCard(
                                 experience = experience,
                                 onBookClick = {
-                                    // TODO: Implementar navegación a detalle/reserva
+                                    // TODO: Implement reserve navigation
                                     Toast.makeText(context, "Próximamente: Reservar ${experience.title}", Toast.LENGTH_SHORT).show()
                                 }
                             )
                         }
 
-                        // Botón de refrescar al final
                         item {
                             Box(
                                 modifier = Modifier
@@ -273,7 +268,7 @@ fun ExperiencesScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 OutlinedButton(
-                                    onClick = { experiencesViewModel.refreshExperiences() },
+                                    onClick = { viewModel.refreshExperiences() },
                                     enabled = !uiState.refreshing
                                 ) {
                                     if (uiState.refreshing) {

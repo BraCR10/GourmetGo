@@ -10,9 +10,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import gourmetgo.client.ui.screens.LoginScreen
 import gourmetgo.client.ui.screens.ExperiencesScreen
-import gourmetgo.client.ui.screens.ProfileScreen
 import gourmetgo.client.viewmodel.AuthViewModel
+import gourmetgo.client.viewmodel.ExperiencesViewModel
 import gourmetgo.client.viewmodel.factories.AuthViewModelFactory
+import gourmetgo.client.viewmodel.factories.ExperiencesViewModelFactory
 
 @Composable
 fun MainNavigation(
@@ -22,6 +23,9 @@ fun MainNavigation(
     val context = LocalContext.current
     val authViewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(context)
+    )
+    val experiencesViewModel: ExperiencesViewModel = viewModel(
+        factory = ExperiencesViewModelFactory(context)
     )
 
     LaunchedEffect(Unit) {
@@ -47,8 +51,9 @@ fun MainNavigation(
 
         composable("experiences") {
             ExperiencesScreen(
+                viewModel = experiencesViewModel,
                 onNavigateToProfile = {
-                    navController.navigate("profile")
+                    navController.navigate("login")
                 },
                 onLogout = {
                     authViewModel.logout()
@@ -59,18 +64,6 @@ fun MainNavigation(
             )
         }
 
-        composable("profile") {
-            ProfileScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate("login") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
+
     }
 }
