@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import gourmetgo.client.data.models.statesUi.ExperiencesUiState
+import gourmetgo.client.viewmodel.statesUi.ExperiencesUiState
 import gourmetgo.client.data.models.Experience
 import gourmetgo.client.data.repository.ExperiencesRepository
 import kotlinx.coroutines.launch
@@ -15,23 +15,16 @@ import kotlinx.coroutines.delay
 
 class ExperiencesViewModel(context: Context) : ViewModel() {
     private val repository = ExperiencesRepository(context)
-
     var uiState by mutableStateOf(ExperiencesUiState())
-
-    init {
-        loadInitialData()
-    }
+    init { loadInitialData()}
 
     private fun loadInitialData() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, error = null)
 
-                // Cargar experiencias y categorías en paralelo
                 val experiencesResult = repository.getAllExperiences()
                 val categoriesResult = repository.getAvailableCategories()
-                val popularResult = repository.getPopularExperiences()
-                val upcomingResult = repository.getUpcomingExperiences()
 
                 experiencesResult
                     .onSuccess { experiences ->
@@ -56,24 +49,6 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
                     }
                     .onFailure { error ->
                         Log.e("ExperiencesViewModel", "Error loading categories", error)
-                    }
-
-                popularResult
-                    .onSuccess { popular ->
-                        uiState = uiState.copy(popularExperiences = popular)
-                        Log.d("ExperiencesViewModel", "Loaded ${popular.size} popular experiences")
-                    }
-                    .onFailure { error ->
-                        Log.e("ExperiencesViewModel", "Error loading popular experiences", error)
-                    }
-
-                upcomingResult
-                    .onSuccess { upcoming ->
-                        uiState = uiState.copy(upcomingExperiences = upcoming)
-                        Log.d("ExperiencesViewModel", "Loaded ${upcoming.size} upcoming experiences")
-                    }
-                    .onFailure { error ->
-                        Log.e("ExperiencesViewModel", "Error loading upcoming experiences", error)
                     }
 
             } catch (e: Exception) {
@@ -133,25 +108,7 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
                     isSearching = true,
                     error = null
                 )
-
-                // Pequeño delay para evitar búsquedas muy frecuentes
                 delay(300)
-
-                repository.searchExperiences(query)
-                    .onSuccess { results ->
-                        uiState = uiState.copy(
-                            searchResults = results,
-                            isSearching = false
-                        )
-                        Log.d("ExperiencesViewModel", "Found ${results.size} results for: $query")
-                    }
-                    .onFailure { error ->
-                        uiState = uiState.copy(
-                            isSearching = false,
-                            error = error.message ?: "Error en la búsqueda"
-                        )
-                        Log.e("ExperiencesViewModel", "Error searching experiences", error)
-                    }
             } catch (e: Exception) {
                 uiState = uiState.copy(
                     isSearching = false,
@@ -175,22 +132,6 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
                     isLoading = true,
                     error = null
                 )
-
-                repository.getExperiencesByCategory(category)
-                    .onSuccess { experiences ->
-                        uiState = uiState.copy(
-                            experiences = experiences,
-                            isLoading = false
-                        )
-                        Log.d("ExperiencesViewModel", "Filtered ${experiences.size} experiences by category: $category")
-                    }
-                    .onFailure { error ->
-                        uiState = uiState.copy(
-                            isLoading = false,
-                            error = error.message ?: "Error al filtrar"
-                        )
-                        Log.e("ExperiencesViewModel", "Error filtering by category", error)
-                    }
             } catch (e: Exception) {
                 uiState = uiState.copy(
                     isLoading = false,
@@ -203,14 +144,7 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
 
     fun clearCategoryFilter() {
         uiState = uiState.copy(selectedCategory = null)
-        loadInitialData() // Recargar todas las experiencias
-    }
-
-    fun getExperienceById(id: String): Experience? {
-        return uiState.experiences.find { it.id == id }
-            ?: uiState.searchResults.find { it.id == id }
-            ?: uiState.popularExperiences.find { it.id == id }
-            ?: uiState.upcomingExperiences.find { it.id == id }
+        loadInitialData()
     }
 
     fun clearSearch() {
@@ -225,7 +159,6 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
         uiState = uiState.copy(error = null)
     }
 
-    // Método para obtener las experiencias que se deben mostrar actualmente
     fun getCurrentExperiences(): List<Experience> {
         return when {
             uiState.searchQuery.isNotBlank() -> uiState.searchResults
@@ -234,17 +167,6 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
         }
     }
 
-    // Método para obtener solo experiencias activas
-    fun getActiveExperiences(): List<Experience> {
-        return getCurrentExperiences().filter { it.status == "Activa" }
-    }
-
-    // Método para verificar si hay experiencias disponibles
-    fun hasExperiences(): Boolean {
-        return getCurrentExperiences().isNotEmpty()
-    }
-
-    // Método para obtener el título de la sección actual
     fun getCurrentSectionTitle(): String {
         return when {
             uiState.searchQuery.isNotBlank() -> "Resultados de búsqueda"

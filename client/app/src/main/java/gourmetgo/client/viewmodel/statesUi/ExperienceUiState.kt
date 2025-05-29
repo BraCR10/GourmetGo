@@ -1,4 +1,4 @@
-package gourmetgo.client.data.models.statesUi
+package gourmetgo.client.viewmodel.statesUi
 import gourmetgo.client.data.models.Experience
 
 data class ExperiencesUiState(

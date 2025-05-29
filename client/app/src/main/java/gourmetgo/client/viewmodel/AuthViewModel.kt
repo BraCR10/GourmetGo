@@ -7,19 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import gourmetgo.client.data.models.statesUi.AuthUiState
+import gourmetgo.client.viewmodel.statesUi.AuthUiState
 import gourmetgo.client.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel(context: Context) : ViewModel() {
     private val repository = AuthRepository(context)
-
     var uiState by mutableStateOf(AuthUiState())
-        private set
-
-    init {
-        checkLoginStatus()
-    }
+    init { checkLoginStatus() }
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
