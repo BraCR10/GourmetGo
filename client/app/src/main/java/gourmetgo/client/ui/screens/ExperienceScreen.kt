@@ -1,6 +1,5 @@
 package gourmetgo.client.ui.screens
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,9 +21,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import gourmetgo.client.data.models.Experience
 import gourmetgo.client.viewmodel.ExperiencesViewModel
 import gourmetgo.client.viewmodel.factories.ExperiencesViewModelFactory
+import gourmetgo.client.ui.components.ExperienceCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -290,194 +289,6 @@ fun ExperiencesScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun ExperienceCard(
-    experience: Experience,
-    onBookClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // Header con título y categoría
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Text(
-                    text = experience.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Surface(
-                    color = when (experience.status) {
-                        "Activa" -> MaterialTheme.colorScheme.primaryContainer
-                        "Agotada" -> MaterialTheme.colorScheme.errorContainer
-                        "Próximamente" -> MaterialTheme.colorScheme.secondaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = experience.category,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = when (experience.status) {
-                            "Activa" -> MaterialTheme.colorScheme.onPrimaryContainer
-                            "Agotada" -> MaterialTheme.colorScheme.onErrorContainer
-                            "Próximamente" -> MaterialTheme.colorScheme.onSecondaryContainer
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Descripción
-            Text(
-                text = experience.description,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Información de ubicación y duración
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = "Ubicación",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = experience.location,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Schedule,
-                        contentDescription = "Duración",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${experience.duration}h",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Capacidad y precio
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = "Capacidad",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${experience.remainingCapacity}/${experience.capacity} disponibles",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Text(
-                    text = "₡${String.format("%,.0f", experience.price)}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            // Estado visual si no está activa
-            if (experience.status != "Activa") {
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    color = when (experience.status) {
-                        "Agotada" -> MaterialTheme.colorScheme.errorContainer
-                        "Próximamente" -> MaterialTheme.colorScheme.secondaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    shape = MaterialTheme.shapes.small,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = when (experience.status) {
-                            "Agotada" -> "❌ Sin disponibilidad"
-                            "Próximamente" -> "⏰ Próximamente disponible"
-                            else -> experience.status
-                        },
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = when (experience.status) {
-                            "Agotada" -> MaterialTheme.colorScheme.onErrorContainer
-                            "Próximamente" -> MaterialTheme.colorScheme.onSecondaryContainer
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Botón de reserva
-            Button(
-                onClick = onBookClick,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = experience.remainingCapacity > 0 && experience.status == "Activa"
-            ) {
-                Text(
-                    text = when {
-                        experience.remainingCapacity <= 0 -> "Agotado"
-                        experience.status == "Próximamente" -> "Próximamente"
-                        experience.status != "Activa" -> "No disponible"
-                        else -> "Reservar ahora"
-                    }
-                )
             }
         }
     }

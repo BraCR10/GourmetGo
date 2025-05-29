@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import gourmetgo.client.viewmodel.AuthViewModel
 import gourmetgo.client.viewmodel.factories.AuthViewModelFactory
+import gourmetgo.client.ui.components.ProfileInfoRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,39 +221,6 @@ fun ProfileScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun ProfileInfoRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    value: String
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column {
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
         }
     }
 }
