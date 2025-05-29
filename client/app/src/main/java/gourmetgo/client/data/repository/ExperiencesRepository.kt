@@ -1,15 +1,15 @@
 package gourmetgo.client.data.repository
 
-import android.content.Context
 import android.util.Log
-import gourmetgo.client.data.remote.Connection
+import gourmetgo.client.data.remote.ApiService
 import gourmetgo.client.data.mockups.ExperiencesMockup
 import gourmetgo.client.data.models.Experience
 import kotlinx.coroutines.delay
 import gourmetgo.client.AppConfig
 
-class ExperiencesRepository(context: Context) {
-    private val connection = Connection()
+class ExperiencesRepository(
+    private val apiService: ApiService
+) {
 
     suspend fun getAllExperiences(): Result<List<Experience>> {
         return try {
@@ -23,6 +23,7 @@ class ExperiencesRepository(context: Context) {
             Result.failure(Exception("Error connection: ${e.message}"))
         }
     }
+
     private suspend fun getAllExperiencesWithMockup(): Result<List<Experience>> {
         delay(800)
         return try {
@@ -34,9 +35,10 @@ class ExperiencesRepository(context: Context) {
             Result.failure(e)
         }
     }
+
     private suspend fun getAllExperiencesWithApi(): Result<List<Experience>> {
         return try {
-            val experiences = connection.apiService.getExperiences().experiences
+            val experiences = apiService.getExperiences().experiences
             Log.d("ExperiencesRepository", "Loaded ${experiences.size} experiences from API")
             Result.success(experiences)
         } catch (e: Exception) {
@@ -44,12 +46,13 @@ class ExperiencesRepository(context: Context) {
             Result.failure(Exception("Error connection to server"))
         }
     }
+
     suspend fun getAvailableCategories(): Result<List<String>> {
         return try {
             if (AppConfig.USE_MOCKUP) {
                 getAvailableCategoriesWithMockup()
             } else {
-                //TODO:Logic with Api
+                // TODO: Implement API call for categories
                 Result.success(emptyList())
             }
         } catch (e: Exception) {
@@ -69,12 +72,6 @@ class ExperiencesRepository(context: Context) {
             Result.failure(e)
         }
     }
-
-
-
-
-
-
 
 
 }

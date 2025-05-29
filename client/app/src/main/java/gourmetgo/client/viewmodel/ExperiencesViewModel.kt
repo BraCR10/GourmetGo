@@ -1,6 +1,5 @@
 package gourmetgo.client.viewmodel
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,11 +11,20 @@ import gourmetgo.client.data.models.Experience
 import gourmetgo.client.data.repository.ExperiencesRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 
-class ExperiencesViewModel(context: Context) : ViewModel() {
-    private val repository = ExperiencesRepository(context)
+class ExperiencesViewModel(
+    private val repository: ExperiencesRepository
+) : ViewModel() {
+
     var uiState by mutableStateOf(ExperiencesUiState())
-    init { loadInitialData()}
+        private set
+
+    private var searchJob: Job? = null
+
+    init {
+        loadInitialData()
+    }
 
     private fun loadInitialData() {
         viewModelScope.launch {
@@ -30,6 +38,8 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
                     .onSuccess { experiences ->
                         uiState = uiState.copy(
                             experiences = experiences,
+                            popularExperiences = getPopularExperiences(experiences),
+                            upcomingExperiences = getUpcomingExperiences(experiences),
                             isLoading = false
                         )
                         Log.d("ExperiencesViewModel", "Loaded ${experiences.size} experiences")
@@ -70,6 +80,8 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
                     .onSuccess { experiences ->
                         uiState = uiState.copy(
                             experiences = experiences,
+                            popularExperiences = getPopularExperiences(experiences),
+                            upcomingExperiences = getUpcomingExperiences(experiences),
                             refreshing = false
                         )
                         Log.d("ExperiencesViewModel", "Refreshed ${experiences.size} experiences")
@@ -93,22 +105,36 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
 
     fun searchExperiences(query: String) {
         if (query.isBlank()) {
-            uiState = uiState.copy(
-                searchQuery = "",
-                searchResults = emptyList(),
-                isSearching = false
-            )
+            clearSearch()
             return
         }
+        searchJob?.cancel()
 
-        viewModelScope.launch {
+        searchJob = viewModelScope.launch {
             try {
                 uiState = uiState.copy(
                     searchQuery = query,
                     isSearching = true,
                     error = null
                 )
+
                 delay(300)
+
+                // Búsqueda local en las experiencias cargadas
+                val filteredExperiences = uiState.experiences.filter { experience ->
+                    experience.title.contains(query, ignoreCase = true) ||
+                            experience.description.contains(query, ignoreCase = true) ||
+                            experience.category.contains(query, ignoreCase = true) ||
+                            experience.location.contains(query, ignoreCase = true)
+                }
+
+                uiState = uiState.copy(
+                    searchResults = filteredExperiences,
+                    isSearching = false
+                )
+
+                Log.d("ExperiencesViewModel", "Search '$query' returned ${filteredExperiences.size} results")
+
             } catch (e: Exception) {
                 uiState = uiState.copy(
                     isSearching = false,
@@ -120,21 +146,17 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
     }
 
     fun filterByCategory(category: String?) {
-        if (category == null) {
-            uiState = uiState.copy(selectedCategory = null)
-            return
-        }
-
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(
                     selectedCategory = category,
-                    isLoading = true,
                     error = null
                 )
+
+                Log.d("ExperiencesViewModel", "Filtered by category: $category")
+
             } catch (e: Exception) {
                 uiState = uiState.copy(
-                    isLoading = false,
                     error = "Error inesperado al filtrar: ${e.message}"
                 )
                 Log.e("ExperiencesViewModel", "Unexpected error in filterByCategory", e)
@@ -144,15 +166,17 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
 
     fun clearCategoryFilter() {
         uiState = uiState.copy(selectedCategory = null)
-        loadInitialData()
+        Log.d("ExperiencesViewModel", "Category filter cleared")
     }
 
     fun clearSearch() {
+        searchJob?.cancel()
         uiState = uiState.copy(
             searchQuery = "",
             searchResults = emptyList(),
             isSearching = false
         )
+        Log.d("ExperiencesViewModel", "Search cleared")
     }
 
     fun clearError() {
@@ -162,16 +186,34 @@ class ExperiencesViewModel(context: Context) : ViewModel() {
     fun getCurrentExperiences(): List<Experience> {
         return when {
             uiState.searchQuery.isNotBlank() -> uiState.searchResults
-            uiState.selectedCategory != null -> uiState.experiences
+            uiState.selectedCategory != null -> uiState.experiences.filter {
+                it.category.equals(uiState.selectedCategory, ignoreCase = true)
+            }
             else -> uiState.experiences
         }
     }
 
     fun getCurrentSectionTitle(): String {
         return when {
-            uiState.searchQuery.isNotBlank() -> "Resultados de búsqueda"
+            uiState.searchQuery.isNotBlank() -> "Resultados de búsqueda (${uiState.searchResults.size})"
             uiState.selectedCategory != null -> "Categoría: ${uiState.selectedCategory}"
-            else -> "Todas las experiencias"
+            else -> "Todas las experiencias (${uiState.experiences.size})"
         }
     }
+
+    private fun getPopularExperiences(experiences: List<Experience>): List<Experience> {
+        return experiences
+            .filter { it.status == "Activa" }
+            .sortedBy { it.remainingCapacity.toDouble() / it.capacity.toDouble() }
+            .take(5)
+    }
+
+    private fun getUpcomingExperiences(experiences: List<Experience>): List<Experience> {
+        return experiences
+            .filter { it.status == "Activa" || it.status == "Próximamente" }
+            .sortedBy { it.date }
+            .take(5)
+    }
+
 }
+

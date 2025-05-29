@@ -1,6 +1,5 @@
 package gourmetgo.client.viewmodel
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,10 +10,16 @@ import gourmetgo.client.viewmodel.statesUi.AuthUiState
 import gourmetgo.client.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
-class AuthViewModel(context: Context) : ViewModel() {
-    private val repository = AuthRepository(context)
+class AuthViewModel(
+    private val repository: AuthRepository
+) : ViewModel() {
+
     var uiState by mutableStateOf(AuthUiState())
-    init { checkLoginStatus() }
+        private set
+
+    init {
+        checkLoginStatus()
+    }
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
@@ -85,5 +90,5 @@ class AuthViewModel(context: Context) : ViewModel() {
     fun clearError() {
         uiState = uiState.copy(error = null)
     }
-}
 
+}
