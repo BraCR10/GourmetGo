@@ -1,0 +1,217 @@
+package gourmetgo.client.ui.screens
+
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import gourmetgo.client.R
+import gourmetgo.client.viewmodel.AuthViewModel
+import gourmetgo.client.viewmodel.factories.AuthViewModelFactory
+
+@Composable
+fun LoginScreen(
+    onLoginSuccess: () -> Unit
+) {
+    val authViewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(LocalContext.current)
+    )
+    var email by remember { mutableStateOf("juan@test.com") }
+    var password by remember { mutableStateOf("123456") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val uiState = authViewModel.uiState
+
+    // Observar cambios en el estado de autenticación
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
+
+    // Mostrar errores
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            authViewModel.clearError()
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Logo
+        Image(
+            painter = painterResource(id = R.mipmap.ic_launcher),
+            contentDescription = "GourmetGo Logo",
+            modifier = Modifier
+                .size(120.dp)
+                .padding(bottom = 32.dp)
+        )
+
+        // Título
+        Text(
+            text = "GourmetGo",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Descubre experiencias culinarias únicas",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        // Campo de email
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Correo electrónico") },
+            leadingIcon = {
+                Icon(Icons.Default.Email, contentDescription = "Email")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Campo de contraseña
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            leadingIcon = {
+                Icon(Icons.Default.Lock, contentDescription = "Password")
+            },
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility
+                        else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña"
+                        else "Mostrar contraseña"
+                    )
+                }
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None
+            else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        authViewModel.login(email, password)
+                    }
+                }
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Botón de login
+        Button(
+            onClick = {
+                if (email.isNotBlank() && password.isNotBlank()) {
+                    authViewModel.login(email, password)
+                }
+            },
+            enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(
+                    text = "Iniciar Sesión",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Texto de ayuda
+        Text(
+            text = "¿Olvidaste tu contraseña?",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 14.sp
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Usuarios de prueba
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Usuarios de prueba:",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Usuario: juan@test.com / 123456",
+                    fontSize = 12.sp
+                )
+                Text(
+                    text = "Chef: maria@chef.com / 123456",
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
