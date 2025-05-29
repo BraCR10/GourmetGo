@@ -23,26 +23,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import gourmetgo.client.viewmodel.AuthViewModel
-import gourmetgo.client.viewmodel.factories.AuthViewModelFactory
 import gourmetgo.client.ui.components.LoginHeader
 import gourmetgo.client.ui.components.TestUserInfoCard
 
 @Composable
 fun LoginScreen(
+    viewModel: AuthViewModel,
     onLoginSuccess: () -> Unit
 ) {
-    val authViewModel: AuthViewModel = viewModel(
-        factory = AuthViewModelFactory(LocalContext.current)
-    )
     var email by remember { mutableStateOf("juan@test.com") }
     var password by remember { mutableStateOf("123456") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val uiState = authViewModel.uiState
+    val uiState = viewModel.uiState
 
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
@@ -53,7 +49,7 @@ fun LoginScreen(
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-            authViewModel.clearError()
+            viewModel.clearError()
         }
     }
 
@@ -113,7 +109,7 @@ fun LoginScreen(
                 onDone = {
                     focusManager.clearFocus()
                     if (email.isNotBlank() && password.isNotBlank()) {
-                        authViewModel.login(email, password)
+                        viewModel.login(email, password)
                     }
                 }
             ),
@@ -126,7 +122,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isNotBlank() && password.isNotBlank()) {
-                    authViewModel.login(email, password)
+                    viewModel.login(email, password)
                 }
             },
             enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),

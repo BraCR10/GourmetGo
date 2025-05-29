@@ -41,6 +41,7 @@ fun MainNavigation(
     ) {
         composable("login") {
             LoginScreen(
+                viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("experiences") {
                         popUpTo("login") { inclusive = true }
@@ -63,7 +64,5 @@ fun MainNavigation(
                 }
             )
         }
-
-
     }
 }

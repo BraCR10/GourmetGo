@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import gourmetgo.client.ui.navigation.MainNavigation
-import gourmetgo.client.ui.theme.GourmetGoTheme
+import gourmetgo.client.ui.theme.AppTheme
 
 class AppMain : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +17,7 @@ class AppMain : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            GourmetGoTheme {
+            AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainNavigation(
                         modifier = Modifier.padding(innerPadding)
