@@ -1,23 +1,30 @@
 package gourmetgo.client.ui.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import gourmetgo.client.data.models.Experience
+import gourmetgo.client.viewmodel.ExperiencesViewModel
+import gourmetgo.client.viewmodel.factories.ExperiencesViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,37 +32,21 @@ fun ExperiencesScreen(
     onNavigateToProfile: () -> Unit,
     onLogout: () -> Unit = {}
 ) {
-    val experiences = remember {
-        listOf(
-            Experience(
-                id = "1",
-                title = "Taller de Sushi para Principiantes",
-                description = "Aprende a preparar sushi tradicional japonés con ingredientes frescos y técnicas auténticas.",
-                date = "2025-06-15T19:00:00Z",
-                location = "San José, Costa Rica",
-                capacity = 15,
-                remainingCapacity = 8,
-                price = 25000.0,
-                duration = 3.0,
-                category = "Taller",
-                images = listOf("https://example.com/sushi1.jpg"),
-                status = "Activa"
-            ),
-            Experience(
-                id = "2",
-                title = "Cena Italiana Gourmet",
-                description = "Una experiencia culinaria italiana auténtica con platos tradicionales de la Toscana.",
-                date = "2025-06-20T20:00:00Z",
-                location = "Cartago, Costa Rica",
-                capacity = 20,
-                remainingCapacity = 5,
-                price = 35000.0,
-                duration = 2.5,
-                category = "Cena",
-                images = listOf("https://example.com/italian1.jpg"),
-                status = "Activa"
-            )
-        )
+    val context = LocalContext.current
+    val experiencesViewModel: ExperiencesViewModel = viewModel(
+        factory = ExperiencesViewModelFactory(context)
+    )
+    val uiState = experiencesViewModel.uiState
+    val focusManager = LocalFocusManager.current
+
+    var searchText by remember { mutableStateOf("") }
+
+    // Mostrar errores como Toast
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            experiencesViewModel.clearError()
+        }
     }
 
     Column(
@@ -65,7 +56,7 @@ fun ExperiencesScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = "Experiencias",
+                    text = "GourmetGo",
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -90,7 +81,9 @@ fun ExperiencesScreen(
             )
         )
 
-        if (experiences.isEmpty()) {
+        // Contenido principal
+        if (uiState.isLoading && uiState.experiences.isEmpty()) {
+            // Estado de carga inicial
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -98,27 +91,204 @@ fun ExperiencesScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "No hay experiencias disponibles",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Vuelve pronto para descubrir nuevas experiencias culinarias",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Cargando experiencias...")
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(experiences) { experience ->
-                    ExperienceCard(experience = experience)
+                // Barra de búsqueda
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = {
+                            searchText = it
+                            if (it.isBlank()) {
+                                experiencesViewModel.clearSearch()
+                            }
+                        },
+                        label = { Text("Buscar experiencias...") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Buscar")
+                        },
+                        trailingIcon = {
+                            if (searchText.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    searchText = ""
+                                    experiencesViewModel.clearSearch()
+                                    focusManager.clearFocus()
+                                }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Limpiar")
+                                }
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Search
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                if (searchText.isNotBlank()) {
+                                    experiencesViewModel.searchExperiences(searchText)
+                                }
+                                focusManager.clearFocus()
+                            }
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        singleLine = true
+                    )
+                }
+
+                // Filtros por categoría
+                if (uiState.categories.isNotEmpty() && uiState.searchQuery.isBlank()) {
+                    LazyRow(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item {
+                            FilterChip(
+                                onClick = { experiencesViewModel.clearCategoryFilter() },
+                                label = { Text("Todas") },
+                                selected = uiState.selectedCategory == null
+                            )
+                        }
+                        items(uiState.categories) { category ->
+                            FilterChip(
+                                onClick = { experiencesViewModel.filterByCategory(category) },
+                                label = { Text(category) },
+                                selected = uiState.selectedCategory == category
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Lista de experiencias
+                val experiencesToShow = experiencesViewModel.getCurrentExperiences()
+
+                if (experiencesToShow.isEmpty() && !uiState.isLoading) {
+                    // Estado vacío
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.SearchOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = when {
+                                    uiState.searchQuery.isNotBlank() -> "No se encontraron experiencias"
+                                    uiState.selectedCategory != null -> "No hay experiencias en esta categoría"
+                                    else -> "No hay experiencias disponibles"
+                                },
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = when {
+                                    uiState.searchQuery.isNotBlank() -> "Intenta con otros términos de búsqueda"
+                                    uiState.selectedCategory != null -> "Prueba con otra categoría"
+                                    else -> "Vuelve pronto para descubrir nuevas experiencias"
+                                },
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            if (uiState.searchQuery.isNotBlank() || uiState.selectedCategory != null) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = {
+                                        searchText = ""
+                                        experiencesViewModel.clearSearch()
+                                        experiencesViewModel.clearCategoryFilter()
+                                    }
+                                ) {
+                                    Text("Ver todas las experiencias")
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Título de sección
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = experiencesViewModel.getCurrentSectionTitle(),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                if (uiState.isSearching) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+                            }
+                        }
+
+                        // Lista de experiencias
+                        items(experiencesToShow) { experience ->
+                            ExperienceCard(
+                                experience = experience,
+                                onBookClick = {
+                                    // TODO: Implementar navegación a detalle/reserva
+                                    Toast.makeText(context, "Próximamente: Reservar ${experience.title}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+
+                        // Botón de refrescar al final
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                OutlinedButton(
+                                    onClick = { experiencesViewModel.refreshExperiences() },
+                                    enabled = !uiState.refreshing
+                                ) {
+                                    if (uiState.refreshing) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text("Actualizar")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -129,6 +299,7 @@ fun ExperiencesScreen(
 @Composable
 fun ExperienceCard(
     experience: Experience,
+    onBookClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -138,6 +309,7 @@ fun ExperienceCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Header con título y categoría
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -151,20 +323,31 @@ fun ExperienceCard(
                 )
 
                 Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = when (experience.status) {
+                        "Activa" -> MaterialTheme.colorScheme.primaryContainer
+                        "Agotada" -> MaterialTheme.colorScheme.errorContainer
+                        "Próximamente" -> MaterialTheme.colorScheme.secondaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
                         text = experience.category,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = when (experience.status) {
+                            "Activa" -> MaterialTheme.colorScheme.onPrimaryContainer
+                            "Agotada" -> MaterialTheme.colorScheme.onErrorContainer
+                            "Próximamente" -> MaterialTheme.colorScheme.onSecondaryContainer
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Descripción
             Text(
                 text = experience.description,
                 fontSize = 14.sp,
@@ -174,12 +357,14 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Información de ubicación y duración
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
                     Icon(
                         Icons.Default.LocationOn,
@@ -191,7 +376,8 @@ fun ExperienceCard(
                     Text(
                         text = experience.location,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
 
@@ -215,6 +401,7 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Capacidad y precio
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -245,18 +432,50 @@ fun ExperienceCard(
                 )
             }
 
+            // Estado visual si no está activa
+            if (experience.status != "Activa") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = when (experience.status) {
+                        "Agotada" -> MaterialTheme.colorScheme.errorContainer
+                        "Próximamente" -> MaterialTheme.colorScheme.secondaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = when (experience.status) {
+                            "Agotada" -> "❌ Sin disponibilidad"
+                            "Próximamente" -> "⏰ Próximamente disponible"
+                            else -> experience.status
+                        },
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        color = when (experience.status) {
+                            "Agotada" -> MaterialTheme.colorScheme.onErrorContainer
+                            "Próximamente" -> MaterialTheme.colorScheme.onSecondaryContainer
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Botón de reserva
             Button(
-                onClick = { /* TODO: Implementar reserva */ },
+                onClick = onBookClick,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = experience.remainingCapacity > 0 && experience.status == "Activa"
             ) {
                 Text(
                     text = when {
                         experience.remainingCapacity <= 0 -> "Agotado"
+                        experience.status == "Próximamente" -> "Próximamente"
                         experience.status != "Activa" -> "No disponible"
-                        else -> "Reservar"
+                        else -> "Reservar ahora"
                     }
                 )
             }

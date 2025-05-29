@@ -2,7 +2,7 @@ package gourmetgo.client.data.mockups
 
 import gourmetgo.client.data.models.User
 
-object UserMockup {
+class UserMockup {
 
     private val testUser = User(
         id = "1",

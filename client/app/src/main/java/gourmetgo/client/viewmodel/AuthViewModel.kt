@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import gourmetgo.client.data.models.additional.AuthUiState
+import gourmetgo.client.data.models.statesUi.AuthUiState
 import gourmetgo.client.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 

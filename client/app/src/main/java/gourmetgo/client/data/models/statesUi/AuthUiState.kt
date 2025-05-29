@@ -1,4 +1,4 @@
-package gourmetgo.client.data.models.additional
+package gourmetgo.client.data.models.statesUi
 import gourmetgo.client.data.models.User
 
 data class AuthUiState(
