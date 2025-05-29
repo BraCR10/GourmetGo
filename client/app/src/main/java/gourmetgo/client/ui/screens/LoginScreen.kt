@@ -1,7 +1,6 @@
 package gourmetgo.client.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,14 +9,15 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,7 +26,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import gourmetgo.client.R
 import gourmetgo.client.viewmodel.AuthViewModel
 import gourmetgo.client.viewmodel.factories.AuthViewModelFactory
 
@@ -45,14 +44,12 @@ fun LoginScreen(
     val context = LocalContext.current
     val uiState = authViewModel.uiState
 
-    // Observar cambios en el estado de autenticación
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
             onLoginSuccess()
         }
     }
 
-    // Mostrar errores
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
@@ -67,16 +64,28 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Logo
-        Image(
-            painter = painterResource(id = R.mipmap.ic_launcher),
-            contentDescription = "GourmetGo Logo",
+        Card(
             modifier = Modifier
                 .size(120.dp)
-                .padding(bottom = 32.dp)
-        )
+                .padding(bottom = 32.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Restaurant,
+                    contentDescription = "GourmetGo Logo",
+                    modifier = Modifier.size(60.dp),
+                    tint = Color.White
+                )
+            }
+        }
 
-        // Título
         Text(
             text = "GourmetGo",
             fontSize = 32.sp,
@@ -113,7 +122,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -151,7 +159,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón de login
         Button(
             onClick = {
                 if (email.isNotBlank() && password.isNotBlank()) {
@@ -179,7 +186,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Texto de ayuda
         Text(
             text = "¿Olvidaste tu contraseña?",
             color = MaterialTheme.colorScheme.primary,
@@ -188,7 +194,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Usuarios de prueba
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(

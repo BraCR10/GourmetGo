@@ -1,6 +1,7 @@
 package gourmetgo.client.data.repository
 
 import android.content.Context
+import android.util.Log
 import gourmetgo.client.data.remote.Connection
 import gourmetgo.client.data.localStorage.SharedPrefsManager
 import gourmetgo.client.data.mockups.UserMockup
@@ -13,10 +14,15 @@ class AuthRepository(context: Context) {
     private val useMockup = true
 
     suspend fun login(email: String, password: String): Result<User> {
-        return if (useMockup) {
-            loginWithMockup(email, password)
-        } else {
-            loginWithApi(email, password)
+        return try {
+            if (useMockup) {
+                loginWithMockup(email, password)
+            } else {
+                loginWithApi(email, password)
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error in login", e)
+            Result.failure(Exception("Connection error: ${e.message}"))
         }
     }
 
@@ -32,9 +38,10 @@ class AuthRepository(context: Context) {
 
                 Result.success(user)
             } else {
-                Result.failure(Exception("Bad credentials "))
+                Result.failure(Exception("Bad credentials"))
             }
         } catch (e: Exception) {
+            Log.e("AuthRepository", "Error in mockup login", e)
             Result.failure(e)
         }
     }
@@ -50,25 +57,43 @@ class AuthRepository(context: Context) {
 
             Result.success(response.user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("AuthRepository", "Error in API login", e)
+            Result.failure(Exception("Error connecting to the server"))
         }
     }
 
     fun logout() {
-        sharedPrefs.logout()
+        try {
+            sharedPrefs.logout()
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error in logout", e)
+        }
     }
 
     fun isLoggedIn(): Boolean {
-        return sharedPrefs.isLoggedIn()
+        return try {
+            sharedPrefs.isLoggedIn()
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error checking login status", e)
+            false
+        }
     }
 
     fun getCurrentUser(): User? {
-        return sharedPrefs.getUser()
+        return try {
+            sharedPrefs.getUser()
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error getting current user", e)
+            null
+        }
     }
 
     fun getToken(): String? {
-        return sharedPrefs.getToken()
+        return try {
+            sharedPrefs.getToken()
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error getting token", e)
+            null
+        }
     }
-
-
 }

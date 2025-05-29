@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -21,9 +22,9 @@ import gourmetgo.client.data.models.Experience
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExperiencesScreen(
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onLogout: () -> Unit = {}
 ) {
-    // Datos de ejemplo - en una app real vendrían del ViewModel
     val experiences = remember {
         listOf(
             Experience(
@@ -75,6 +76,12 @@ fun ExperiencesScreen(
                         contentDescription = "Perfil"
                     )
                 }
+                IconButton(onClick = onLogout) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Cerrar Sesión"
+                    )
+                }
             },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -83,14 +90,36 @@ fun ExperiencesScreen(
             )
         )
 
-        // Lista de experiencias
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(experiences) { experience ->
-                ExperienceCard(experience = experience)
+        if (experiences.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "No hay experiencias disponibles",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Vuelve pronto para descubrir nuevas experiencias culinarias",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(experiences) { experience ->
+                    ExperienceCard(experience = experience)
+                }
             }
         }
     }
@@ -109,7 +138,6 @@ fun ExperienceCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Título y categoría
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,7 +165,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Descripción
             Text(
                 text = experience.description,
                 fontSize = 14.sp,
@@ -147,12 +174,10 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Información adicional
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Ubicación
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -170,7 +195,6 @@ fun ExperienceCard(
                     )
                 }
 
-                // Duración
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -191,7 +215,6 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Capacidad y precio
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,14 +247,17 @@ fun ExperienceCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Botón de reservar
             Button(
                 onClick = { /* TODO: Implementar reserva */ },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = experience.remainingCapacity > 0
+                enabled = experience.remainingCapacity > 0 && experience.status == "Activa"
             ) {
                 Text(
-                    text = if (experience.remainingCapacity > 0) "Reservar" else "Agotado"
+                    text = when {
+                        experience.remainingCapacity <= 0 -> "Agotado"
+                        experience.status != "Activa" -> "No disponible"
+                        else -> "Reservar"
+                    }
                 )
             }
         }
