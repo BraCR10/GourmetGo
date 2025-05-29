@@ -51,5 +51,16 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // RETROFIT -
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    // COROUTINES
+    implementation(libs.kotlinx.coroutines.android)
+
+    // JSON
+    implementation(libs.gson)
+
 
 }
